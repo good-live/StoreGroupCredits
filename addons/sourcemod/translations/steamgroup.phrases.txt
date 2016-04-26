@@ -1,0 +1,12 @@
+"Phrases"
+{
+	"Credits Recieved"
+	{
+		"#format"	"{1:i}"
+		"en"		"{green}[{purple}PLG{green}]{orange} You recieved {green}%i{orange} Credits. Thanks for joining our Steam Group!"
+	}
+	"No Connection"
+	{
+		"en"		"{green}[{purple}PLG{green}]{orange} The database is not connected yet. You will recieve your credits, when it's connected!"
+	}
+}
