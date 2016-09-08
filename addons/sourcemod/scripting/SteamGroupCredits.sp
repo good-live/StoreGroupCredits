@@ -164,7 +164,7 @@ public void DBConnect_Callback(Database db, const char[] error, any data)
 	
 	char sQuery[512];
 	
-	Format(sQuery, sizeof(sQuery), "CREATE TABLE IF NOT EXISTS `SteamGroupCredits` (`thekey` bigint(20) NOT NULL AUTO_INCREMENT, `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, `playerid` varchar(20) NOT NULL, `amount` int(11) NOT NULL, PRIMARY KEY (`thekey`))");
+	Format(sQuery, sizeof(sQuery), "CREATE TABLE IF NOT EXISTS `SteamGroupCredits` (`thekey` bigint(20) NOT NULL AUTO_INCREMENT, `timestamp` int NOT NULL DEFAULT CURRENT_TIMESTAMP, `playerid` varchar(20) NOT NULL, `amount` int(11) NOT NULL, PRIMARY KEY (`thekey`))");
 	g_hDB.Query(DBCreateTable_Callback, sQuery);
 }
 
