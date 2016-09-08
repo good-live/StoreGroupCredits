@@ -76,6 +76,7 @@ public Action Timer_Cooldown(Handle timer, int userid)
 	int client = GetClientOfUserId(userid);
 	if(g_hTimer[client] != INVALID_HANDLE)
 	{
+		KillTimer(g_hTimer[client]);
 		CloseHandle(g_hTimer[client]);
 		g_hTimer[client] = INVALID_HANDLE;
 		return Plugin_Stop;
@@ -164,7 +165,7 @@ public void DBConnect_Callback(Database db, const char[] error, any data)
 	
 	char sQuery[512];
 	
-	Format(sQuery, sizeof(sQuery), "CREATE TABLE IF NOT EXISTS `SteamGroupCredits` (`thekey` bigint(20) NOT NULL AUTO_INCREMENT, `timestamp` int NOT NULL DEFAULT CURRENT_TIMESTAMP, `playerid` varchar(20) NOT NULL, `amount` int(11) NOT NULL, PRIMARY KEY (`thekey`))");
+	Format(sQuery, sizeof(sQuery), "CREATE TABLE IF NOT EXISTS `SteamGroupCredits` (`thekey` bigint(20) NOT NULL, `timestamp` int(11) DEFAULT '0', `playerid` varchar(20) NOT NULL, `amount` int(11) NOT NULL, PRIMARY KEY (`thekey`))");
 	g_hDB.Query(DBCreateTable_Callback, sQuery);
 }
 
@@ -175,20 +176,9 @@ public void DBCreateTable_Callback(Database db, DBResultSet results, const char[
 		SetFailState("Table creation failed: %s", error);
 	}
 	
-	OnDatabaseConnected();
-	
-	LogDebug("Table Creation succesfull");
-}
-
-public void OnDatabaseConnected()
-{
 	g_bDB_Connected = true;
 	
-	for (int i = 1; i <= MaxClients; i++)
-	{
-		if (IsValidClient(i))
-			SteamWorks_GetUserGroupStatus(i, 103582791435943299);
-	}
+	LogDebug("Table Creation succesfull");
 }
 
 public void DBCheck_Callback(Database db, DBResultSet results, const char[] error, any userid)
