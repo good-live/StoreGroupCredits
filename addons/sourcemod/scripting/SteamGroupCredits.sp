@@ -75,12 +75,7 @@ public Action Timer_Cooldown(Handle timer, int userid)
 {
 	int client = GetClientOfUserId(userid);
 	if(g_hTimer[client] != INVALID_HANDLE)
-	{
-		KillTimer(g_hTimer[client]);
-		CloseHandle(g_hTimer[client]);
 		g_hTimer[client] = INVALID_HANDLE;
-		return Plugin_Stop;
-	}
 	return Plugin_Stop;
 }
 
