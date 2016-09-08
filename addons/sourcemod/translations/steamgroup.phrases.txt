@@ -3,10 +3,23 @@
 	"Credits Recieved"
 	{
 		"#format"	"{1:i}"
-		"en"		"{green}[{purple}PLG{green}]{orange} You recieved {green}%i{orange} Credits. Thanks for joining our Steam Group!"
+		"en"		"{green}[{purple}PLG{green}]{orange} You recieved {green}{1}{orange} Credits. Thanks for joining our Steam Group!"
 	}
 	"No Connection"
 	{
 		"en"		"{green}[{purple}PLG{green}]{orange} The database is not connected yet. You will recieve your credits, when it's connected!"
+	}
+	"Already Recieved"
+	{
+		"#format"	"{1:s}"
+		"en"		"{green}[{purple}PLG{green}]{orange} You already recieved {green} Credits{orange} on {green}{1}{orange}. Thanks for joining our Steam Group!"
+	}
+	"Date Uknown"
+	{
+		"en"		"{green}[{purple}PLG{green}]{orange} You already recieved {green} Credits{orange}. Thanks for joining our Steam Group!"
+	}
+	"Cooldown"
+	{
+		"en"		"{green}[{purple}PLG{green}]{orange} You need to wait before you can use that command again."
 	}
 }

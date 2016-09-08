@@ -7,13 +7,6 @@
 #include <multicolors>
 #include <logdebug>
 
-Database g_hDB;
-
-int g_iAmount = 200;
-
-bool g_bIsInGroup[MAXPLAYERS + 1];
-bool g_bDB_Connected = false;
-
 public Plugin myinfo = 
 {
 	name = "SteamGroup Credits", 
@@ -22,11 +15,24 @@ public Plugin myinfo =
 	version = "2.0", 
 	url = "http://ggc-base.de"
 };
+
+Database g_hDB;
+bool g_bIsInGroup[MAXPLAYERS + 1];
+bool g_bDB_Connected = false;
+Handle g_hTimer[MAXPLAYERS + 1] = {INVALID_HANDLE, ...};
+ConVar g_fCooldown;
+ConVar g_iAmount;
+
 public void OnPluginStart()
 {
 	InitDebugLog("steamgroup_debug", "SGC", ADMFLAG_ROOT);
 	RegConsoleCmd("sm_claim", ClaimCredits, "Claims the credits for joining the group");
+
+	g_fCooldown = CreateConVar("sgc_cooldown", "10.0", "The command cooldown");
+	g_iAmount = CreateConVar("sgc_amount", "250", "The amount of credits a player get");
 	
+	AutoExecConfig(true);
+
 	if (!SQL_CheckConfig("steamgroup"))
 	{
 		LogDebug("Could not find the steamgroup Database entry");
@@ -38,11 +44,23 @@ public void OnPluginStart()
 	
 	LoadTranslations("steamgroup.phrases");
 }
+
 public Action ClaimCredits(client, args)
 {
 	if (!IsValidClient(client))
 		return Plugin_Handled;
-	
+
+	if(g_fCooldown.FloatValue > 0.0)
+	{
+		if(g_hTimer[client] != INVALID_HANDLE)
+		{
+			CPrintToChat(client, "%t" , "Cooldown", client);
+			return Plugin_Handled;
+		}else{
+			g_hTimer[client] = CreateTimer(g_fCooldown.FloatValue, Timer_Cooldown, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
+		}
+	}
+
 	LogDebug("Trying to lookup Client: %i Database connected: %b", client, g_bDB_Connected);
 	
 	if (g_bDB_Connected)
@@ -53,12 +71,18 @@ public Action ClaimCredits(client, args)
 	return Plugin_Handled;
 }
 
-public void OnClientPutInServer(int client)
+public Action Timer_Cooldown(Handle timer, int userid)
 {
-	LogDebug("Trying to lookup Client: %i", client);
-	if (g_bDB_Connected)
-		SteamWorks_GetUserGroupStatus(client, 103582791429521979);
+	int client = GetClientOfUserId(userid);
+	if(g_hTimer[client] != INVALID_HANDLE)
+	{
+		CloseHandle(g_hTimer[client]);
+		g_hTimer[client] = INVALID_HANDLE;
+		return Plugin_Stop;
+	}
+	return Plugin_Stop;
 }
+
 
 public OnClientDisconnect(int client)
 {
@@ -88,7 +112,8 @@ public int SteamWorks_OnClientGroupStatus(int authid, int groupid, bool isMember
 				
 				int iUserid = GetClientUserId(client);
 				
-				Format(sQuery, sizeof(sQuery), "SELECT COUNT(*) FROM SteamGroupCredits WHERE playerid = '%s'", sClient_id);
+				Format(sQuery, sizeof(sQuery), "SELECT timestamp FROM SteamGroupCredits WHERE playerid = '%s'", sClient_id);
+				LogDebug("%s", sQuery);
 				g_hDB.Query(DBCheck_Callback, sQuery, iUserid);
 				
 			}
@@ -180,19 +205,33 @@ public void DBCheck_Callback(Database db, DBResultSet results, const char[] erro
 	
 	results.FetchRow();
 	
+	LogDebug("Checking if client is in Database.");
+	
 	if (!results.RowCount)
 	{
+		LogDebug("He is not in the Database");
 		char sAuthID[21];
 		char sQuery[512];
 		
 		if (!GetClientAuthId(client, AuthId_Steam2, sAuthID, sizeof(sAuthID)))
 			return;
 		
-		Store_SetClientCredits(client, Store_GetClientCredits(client) + g_iAmount);
-		CPrintToChat(client, "%t", "Credits Recieved", g_iAmount);
+		Store_SetClientCredits(client, Store_GetClientCredits(client) + g_iAmount.IntValue);
+		CPrintToChat(client, "%t", "Credits Recieved", g_iAmount.IntValue);
 		
-		Format(sQuery, sizeof(sQuery), "INSERT INTO `SteamGroupCredits` (`thekey`, `timestamp`, `playerid`, `amount`) VALUES (NULL, CURRENT_TIMESTAMP, '%s', '%i')", sAuthID, g_iAmount);
+		Format(sQuery, sizeof(sQuery), "INSERT INTO `SteamGroupCredits` (`thekey`, `timestamp`, `playerid`, `amount`) VALUES (NULL, '%i', '%s', '%i')", GetTime(), sAuthID, g_iAmount.IntValue);
+		LogDebug("%s", sQuery);
 		g_hDB.Query(DBQuery_Callback, sQuery);
+	}else{
+		int timestamp = results.FetchInt(0);
+		if(timestamp == 2016)
+		{
+			CPrintToChat(client, "%T", "Date Uknown", client);
+		}else{
+			char sDate[64];
+			FormatTime(sDate, sizeof(sDate), "%m.%d.%Y - %T", timestamp);
+			CPrintToChat(client, "%t", "Already Recieved", sDate);
+		}
 	}
 }
 
