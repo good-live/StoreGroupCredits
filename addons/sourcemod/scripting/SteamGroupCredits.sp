@@ -64,7 +64,7 @@ public Action ClaimCredits(client, args)
 	LogDebug("Trying to lookup Client: %i Database connected: %b", client, g_bDB_Connected);
 	
 	if (g_bDB_Connected)
-		SteamWorks_GetUserGroupStatus(client, 103582791429521979);
+		SteamWorks_GetUserGroupStatus(client, 103582791435943299);
 	else
 		CPrintToChat(client, "%t", "No Connection");
 	
