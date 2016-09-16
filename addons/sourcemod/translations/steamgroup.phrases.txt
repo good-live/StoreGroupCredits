@@ -22,4 +22,8 @@
 	{
 		"en"		"{green}[{purple}PLG{green}]{orange} You need to wait before you can use that command again."
 	}
+	"You are not in the Group"
+	{
+		"en"		"{green}[{purple}PLG{green}]{orange} Du bist kein Mitglied in der Gruppe. Evtl ist auch die API ausgelastet probier es ggf. nochmal."
+	}
 }

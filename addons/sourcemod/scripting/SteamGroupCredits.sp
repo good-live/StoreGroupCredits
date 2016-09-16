@@ -115,6 +115,9 @@ public int SteamWorks_OnClientGroupStatus(int authid, int groupid, bool isMember
 			}
 		}
 	}
+	else{
+		CPrintToChat(client, "%t", "You are not in the Group");
+	}
 	return 0;
 }
 int GetUserFromAuthID(int authid) {
